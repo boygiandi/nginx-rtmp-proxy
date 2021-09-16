@@ -4,7 +4,7 @@ const fs = require('fs');
 const { exec } = require("child_process");
 const app = express()
 const port = 3000
-const domain = "rtmp://149.56.20.83:1935"
+const domain = process.env.PUBLIC_DOMAIN || ""
 
 const nginx_config = `
   application %APP_NAME% {
