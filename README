@@ -1,12 +1,12 @@
 
 To build docker image
 
-  docker build -t nginx-rtmp-proxy:v1 .
+  docker build -t nginx-rtmp-proxy .
   
 To run docker as debug
 
-  docker run -it --rm -p 3000:3000 -p 19350:1935 -e PUBLIC_DOMAIN=rtmp://ip:port nginx-rtmp-proxy:v1
+  docker run -it --rm -p 3000:3000 -p 19350:1935 -e PUBLIC_DOMAIN=rtmp://ip:port nginx-rtmp-proxy
 
 To run docker in background
 
-  docker run -d --rm -p 3000:3000 -p 19350:1935 -e PUBLIC_DOMAIN=rtmp://ip:port nginx-rtmp-proxy:v1
+  docker run -d --rm -p 3000:3000 -p 19350:1935 -e PUBLIC_DOMAIN=rtmp://ip:port nginx-rtmp-proxy
