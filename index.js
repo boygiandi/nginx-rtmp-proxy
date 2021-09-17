@@ -2,9 +2,16 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const fs = require('fs');
 const { exec } = require("child_process");
+const basicAuth = require('express-basic-auth')
 const app = express()
 const port = 3000
 const domain = process.env.PUBLIC_DOMAIN || ""
+
+if ( process.env.USER && process.env.PASSWORD ) {
+  let users = {};
+  users[process.env.USER] = process.env.PASSWORD;
+  app.use(basicAuth(users))
+}
 
 const nginx_config = `
   application %APP_NAME% {
