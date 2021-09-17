@@ -62,7 +62,8 @@ app.post('/register', (req, res) => {
 
 function cleanUp() {
   // delete all confid file after 8 hours
-	exec("find ./nginx-rtmp/ -daystart -maxdepth 1 -mmin +480 -type f -name '*.conf' -exec rm -f {} \\;", (error, stdout, stderr) => {})
+  let deltaTime = process.env.MAX_DURATION * 60
+  exec(`find ./nginx-rtmp/ -daystart -maxdepth 1 -mmin +${deltaTime} -type f -name '*.conf' -exec rm -f {} \\;`, (error, stdout, stderr) => {})
 }
 
 setInterval(cleanUp, 30 * 60 * 1000) // 30 mins
