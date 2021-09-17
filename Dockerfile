@@ -15,6 +15,7 @@ RUN chmod +x /app/startup.sh
 
 RUN mkdir /app/nginx-rtmp/
 RUN echo "include /app/nginx-rtmp.conf;" >> /usr/local/nginx/conf/nginx.conf
+RUN sed -i 's/worker_processes  1;/worker_processes  auto;/' /usr/local/nginx/conf/nginx.conf
 RUN /usr/local/nginx/sbin/nginx -t
 
 WORKDIR /app
