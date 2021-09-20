@@ -70,7 +70,7 @@ app.post('/register', (req, res) => {
   res.send({
     url: `${domain}/${streamId}/live`,
     stream_url: `${domain}/${streamId}/`,
-    stream_key: "live"
+    stream_key: streamId
   })
 })
 
