@@ -17,6 +17,9 @@ const nginx_config = `
   application %APP_NAME% {
     live on;
     record %RECORD%;
+    record_path /app/recorded;
+    record_unique on;
+    record_append on;
 
     %LIST_URL%
   }
@@ -52,8 +55,9 @@ app.post('/register', (req, res) => {
     return `push ${url};`
   }).join("\n")
   streamId = streamId.replace(/\//g, '').replace(/\./g, '');
+  let record = req.body.record ? 'all' : 'off';
   let config = nginx_config.replace(/%APP_NAME%/ig, streamId)
-                  .replace(/%RECORD%/ig, 'off')
+                  .replace(/%RECORD%/ig, record)
                   .replace(/%LIST_URL%/ig, list_url);
   fs.writeFile(`./nginx-rtmp/${streamId}.conf`, config, err => {
     if(err) {
