@@ -14,3 +14,5 @@ To run docker in background
 Register new session
 
     curl --location --request POST 'http://user:password@localhost:3000/register' --header 'Content-Type: application/json' -d '{"streamId":"123456", "broadcast": ["rtmps://live-api-s.facebook.com:443/rtmp/xxx", "rtmps://live-api-s.facebook.com:443/rtmp/FB-yyy"]}'
+
+If you want to record live stream, create a folder and mount it to /app/recoreded of docker container. Remember to chmod 777 for this forder both in container and in host machine
