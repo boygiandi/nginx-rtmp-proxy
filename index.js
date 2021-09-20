@@ -22,6 +22,20 @@ const nginx_config = `
   }
 `;
 
+function reloadNginx() {
+  return exec("/usr/local/nginx/sbin/nginx -s reload", (error, stdout, stderr) => {
+    if (error) {
+      console.log(`error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.log(`stderr: ${stderr}`);
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
+  })
+}
+
 app.use(bodyParser.json({ type: 'application/json' }))
 
 app.get('/', (req, res) => {
@@ -37,21 +51,12 @@ app.post('/register', (req, res) => {
     url = url.replace('live-api-s.facebook.com:443', 'localhost:19350').replace('rtmps://', 'rtmp://')
     return `push ${url};`
   }).join("\n")
+  streamId = streamId.replace(/\//g, '').replace(/\./g, '');
   let config = nginx_config.replace(/%APP_NAME%/ig, streamId)
                   .replace(/%RECORD%/ig, 'off')
                   .replace(/%LIST_URL%/ig, list_url);
   fs.writeFileSync(`./nginx-rtmp/${streamId}.conf`, config)
-  exec("/usr/local/nginx/sbin/nginx -s reload", (error, stdout, stderr) => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-  })
+  reloadNginx()
 
   res.send({
     url: `${domain}/${streamId}/live`,
@@ -60,9 +65,19 @@ app.post('/register', (req, res) => {
   })
 })
 
+app.get('remove', (req, res) => {
+  if ( !req.query.id ) return res.send({ error: "invalid_input" });
+  let streamId = req.query.id.replace(/\//g, '').replace(/\./g, '');
+  fs.unlink(`./nginx-rtmp/${streamId}.conf`, (e) => {})
+  reloadNginx()
+  res.send({
+    status: "success"
+  })
+})
+
 function cleanUp() {
-  // delete all confif file after 8 hours
-  let deltaTime = parseInt(process.env.MAX_DURATION || 8) * 60
+  // delete all config file older than 24 hours
+  let deltaTime = parseInt(process.env.MAX_DURATION || 24) * 60
   exec(`find ./nginx-rtmp/ -daystart -maxdepth 1 -mmin +${deltaTime} -type f -name '*.conf' -exec rm -f {} \\;`, (error, stdout, stderr) => {})
 }
 
