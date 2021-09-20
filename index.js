@@ -55,8 +55,13 @@ app.post('/register', (req, res) => {
   let config = nginx_config.replace(/%APP_NAME%/ig, streamId)
                   .replace(/%RECORD%/ig, 'off')
                   .replace(/%LIST_URL%/ig, list_url);
-  fs.writeFileSync(`./nginx-rtmp/${streamId}.conf`, config)
-  reloadNginx()
+  fs.writeFile(`./nginx-rtmp/${streamId}.conf`, config, err => {
+    if(err) {
+        return console.log(err);
+    }
+    console.log("The file was saved!");
+    reloadNginx()
+  })
 
   res.send({
     url: `${domain}/${streamId}/live`,
