@@ -10,7 +10,7 @@ const domain = process.env.PUBLIC_DOMAIN || ""
 if ( process.env.USER && process.env.PASSWORD ) {
   let users = {};
   users[process.env.USER] = process.env.PASSWORD;
-  app.use(basicAuth(users))
+  app.use(basicAuth({ users }))
 }
 
 const nginx_config = `
