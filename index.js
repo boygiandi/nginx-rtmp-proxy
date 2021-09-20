@@ -12,6 +12,7 @@ if ( process.env.USER && process.env.PASSWORD ) {
   users[process.env.USER] = process.env.PASSWORD;
   app.use(basicAuth({ users }))
 }
+app.use(express.static('recorded'))
 
 const nginx_config = `
   application %APP_NAME% {
