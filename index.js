@@ -27,17 +27,19 @@ const nginx_config = `
 `;
 
 function reloadNginx() {
-  return exec("/usr/local/nginx/sbin/nginx -s reload", (error, stdout, stderr) => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-  })
+  return new Promise((resolve, reject) => {
+    exec("/usr/local/nginx/sbin/nginx -s reload", (error, stdout, stderr) => {
+      if (error) {
+        reject(error)
+        return;
+      }
+      if (stderr) {
+        reject(stderr)
+        return;
+      }
+      resolve();
+    })
+  });
 }
 
 app.use(bodyParser.json({ type: 'application/json' }))
@@ -60,18 +62,19 @@ app.post('/register', (req, res) => {
   let config = nginx_config.replace(/%APP_NAME%/ig, streamId)
                   .replace(/%RECORD%/ig, record)
                   .replace(/%LIST_URL%/ig, list_url);
-  fs.writeFile(`./nginx-rtmp/${streamId}.conf`, config, err => {
-    if(err) {
-        return console.log(err);
-    }
-    console.log("The file was saved!");
-    reloadNginx()
-  })
-
-  res.send({
-    url: `${domain}/${streamId}/${streamId}`,
-    stream_url: `${domain}/${streamId}/`,
-    stream_key: streamId
+  let configFile = `./nginx-rtmp/${streamId}.conf`;
+  fs.writeFileSync(configFile, config)
+  return reloadNginx().then(res => {
+    console.log('reloadNginx ok')
+    return res.send({
+      url: `${domain}/${streamId}/live`,
+      stream_url: `${domain}/${streamId}/`,
+      stream_key: streamId
+    })
+  }).catch(e => {
+    console.log('reloadNginx error, remove file ', configFile)
+    fs.unlink(configFile, (e) => {})
+    return res.send({error: "config file error"})
   })
 })
 
