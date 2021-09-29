@@ -64,7 +64,7 @@ app.post('/register', (req, res) => {
                   .replace(/%LIST_URL%/ig, list_url);
   let configFile = `./nginx-rtmp/${streamId}.conf`;
   fs.writeFileSync(configFile, config)
-  return reloadNginx().then(res => {
+  return reloadNginx().then(_ => {
     console.log('reloadNginx ok')
     return res.send({
       url: `${domain}/${streamId}/live`,
@@ -72,13 +72,13 @@ app.post('/register', (req, res) => {
       stream_key: streamId
     })
   }).catch(e => {
-    console.log('reloadNginx error, remove file ', configFile)
+    console.log('reloadNginx error, remove file ', configFile, e)
     fs.unlink(configFile, (e) => {})
     return res.send({error: "config file error"})
   })
 })
 
-app.get('remove', (req, res) => {
+app.get('/remove', (req, res) => {
   if ( !req.query.id ) return res.send({ error: "invalid_input" });
   let streamId = req.query.id.replace(/\//g, '').replace(/\./g, '');
   fs.unlink(`./nginx-rtmp/${streamId}.conf`, (e) => {})
@@ -86,6 +86,15 @@ app.get('remove', (req, res) => {
   res.send({
     status: "success"
   })
+})
+
+app.get('/record', (req, res) => {
+  if ( !req.query.id ) return res.send({ error: "invalid_input" });
+  let streamId = req.query.id.replace(/\./, '');
+  if ( fs.existsSync(`./recorded/${streamId}.flv`) ) {
+    return res.send({ url: `https://recorded.gostudio.co/${streamId}.flv` })
+  }
+  return res.send({error: "file_not_found"})
 })
 
 function cleanUp() {

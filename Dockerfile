@@ -9,14 +9,17 @@ RUN cd nginx-1.20.1 && pwd && ls -l && ./configure --prefix=/usr/local/nginx --w
 RUN apk add stunnel
 RUN apk add --update nodejs npm
 
-ADD . /app
+ADD package*.json /app/
 RUN cd /app && npm install
-RUN chmod +x /app/startup.sh 
 
 RUN mkdir /app/nginx-rtmp/
+ADD nginx-rtmp.conf /app/
 RUN echo "include /app/nginx-rtmp.conf;" >> /usr/local/nginx/conf/nginx.conf
 RUN sed -i 's/worker_processes  1;/worker_processes  auto;/' /usr/local/nginx/conf/nginx.conf
 RUN /usr/local/nginx/sbin/nginx -t
+
+ADD . /app
+RUN chmod +x /app/startup.sh
 
 WORKDIR /app
 ENTRYPOINT "./startup.sh"
