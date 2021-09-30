@@ -51,7 +51,7 @@ app.get('/', (req, res) => {
 app.post('/register', (req, res) => {
   let { streamId, broadcast } = req.body;
   if ( !streamId || !broadcast ) return res.send({error: "invalid_input"});
-  if ( broadcast.length==1 ) return res.send({url: broadcast[0]});
+  if ( !record && broadcast.length==1 ) return res.send({url: broadcast[0]});
 
   let list_url = broadcast.map(url => {
     url = url.replace('live-api-s.facebook.com:443', 'localhost:19350').replace('rtmps://', 'rtmp://')
